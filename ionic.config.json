@@ -1,0 +1,7 @@
+{
+  "name": "ats-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
