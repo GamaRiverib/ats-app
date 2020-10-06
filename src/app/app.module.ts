@@ -19,7 +19,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { MqttModule } from 'ngx-mqtt';
 import { SocketIoModule } from 'ngx-socket-io';
 
-import { SERVER_URL } from 'src/environments/environment';
+import { ATS_WS_CHANNEL_PATH, WS_SERVER_URL } from 'src/environments/environment';
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,7 +28,7 @@ import { SERVER_URL } from 'src/environments/environment';
     BrowserModule,
     HttpClientModule,
     MqttModule.forRoot({ connectOnCreate: false }),
-    SocketIoModule.forRoot({ url: SERVER_URL, options: { autoConnect : false } }),
+    SocketIoModule.forRoot({ url: WS_SERVER_URL, options: { autoConnect : false, path: ATS_WS_CHANNEL_PATH } }),
     IonicModule.forRoot(),
     AppRoutingModule
   ],

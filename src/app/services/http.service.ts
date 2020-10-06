@@ -10,12 +10,15 @@ export type HttpHeaders = { [header: string]: string };
 })
 export class HttpService {
 
+  public useWeb = true;
+
   constructor(
     private http: HTTP,
     private httpClient: HttpClient,
     private platform: Platform) {
       if (this.platform.is('hybrid')) {
         console.log('Running on hybrid platform');
+        this.useWeb = false;
       }
     }
 
@@ -114,28 +117,28 @@ export class HttpService {
   }
 
   public get(url: string, headers?: HttpHeaders, options?: any): Promise<any> {
-    if (this.platform.is('hybrid')) {
+    if (this.platform.is('hybrid') && !this.useWeb) {
       return this.getNative(url, headers, options);
     }
     return this.getWeb(url, headers, options);
   }
 
   public post(url: string, body: any, headers?: HttpHeaders, options?: any): Promise<any> {
-    if (this.platform.is('hybrid')) {
+    if (this.platform.is('hybrid') && !this.useWeb) {
       return this.postNative(url, body, headers, options);
     }
     return this.postWeb(url, body, headers, options);
   }
 
   public put(url: string, body?: any, headers?: HttpHeaders, options?: any): Promise<any> {
-    if (this.platform.is('hybrid')) {
+    if (this.platform.is('hybrid') && !this.useWeb) {
       return this.putNative(url, body, headers, options);
     }
     return this.putWeb(url, body, headers, options);
   }
 
   public delete(url: string, headers?: HttpHeaders, options?: any): Promise<any> {
-    if (this.platform.is('hybrid')) {
+    if (this.platform.is('hybrid') && !this.useWeb) {
       return this.deleteNative(url, headers, options);
     }
     return this.deleteWeb(url, headers, options);

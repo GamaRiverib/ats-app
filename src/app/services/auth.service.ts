@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HTTP, HTTPResponse } from '@ionic-native/http/ngx';
 import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_URL, REDIRECT_URI } from 'src/environments/environment';
+import { HttpService } from './http.service';
 import { AuthData, LocalStorageService } from './local-storage.service';
 
 interface AuthCodeParams {
@@ -23,9 +24,10 @@ export class AuthService {
   private refreshTokenTimeout: any;
 
   constructor(
+    private http: HttpService,
     private localStorage: LocalStorageService,
-    private webIntent: WebIntent,
-    private http: HTTP) {
+    private webIntent: WebIntent) {
+      this.http.useWeb = true;
       this.getAccessToken();
       this.checkRefreshToken();
     }
@@ -119,22 +121,15 @@ export class AuthService {
             };
             const url = OAUTH_URL;
             const headers = {};
-            this.http.setDataSerializer('json');
+            // this.http.setDataSerializer('json');
             // this.http.clearCookies();
             this.http.post(url, body, headers)
-              .then((response: HTTPResponse) => {
-                if (response.status !== 200) {
-                  clearTimeout(timeOut);
-                  return reject('Something was wrong with authentication process. Code 06');
-                }
-                if (!response.data || response.data === '') {
-                  clearTimeout(timeOut);
-                  return reject('Something was wrong with authentication process. Code 07');
-                }
-                const json = JSON.parse(response.data);
-                authData.access_token = json.access_token;
-                authData.refresh_token = json.refresh_token;
-                authData.expires_in = json.expires_in || 600;
+              .then((response: any) => {
+                console.log(response);
+                clearTimeout(timeOut);
+                authData.access_token = response.access_token;
+                authData.refresh_token = response.refresh_token;
+                authData.expires_in = response.expires_in || 600;
                 authData.refresh_at = Date.now() + authData.expires_in * 1000;
                 this.refreshTokenTimeout = setTimeout(this.refreshToken.bind(this), authData.expires_in * 1000);
                 this.localStorage.setAuthData(authData);
@@ -159,7 +154,7 @@ export class AuthService {
 
   private async checkRefreshToken(): Promise<void> {
     const authData: AuthData = await this.localStorage.getAuthData();
-    if (authData && authData.refresh_at) {
+    if (authData && authData.refresh_at > 0) {
       if (Date.now() > authData.refresh_at) {
         this.refreshToken();
       } else if (!this.refreshTokenTimeout) {
@@ -194,7 +189,8 @@ export class AuthService {
       try {
         const authData: AuthData = await this.localStorage.getAuthData();
         if (!authData || !authData.access_token || !authData.refresh_token) {
-          throw Error('User not authenticated');
+          const error = new Error('User not authenticated');
+          return reject(error);
         }
         clearTimeout(this.refreshTokenTimeout);
         this.refreshTokenTimeout = null;
@@ -213,29 +209,24 @@ export class AuthService {
         };
         const url = OAUTH_URL;
         const headers = {};
-        this.http.setDataSerializer('json');
+        // this.http.setDataSerializer('json');
         // this.http.clearCookies();
         this.http.post(url, body, headers)
-          .then((response: HTTPResponse) => {
-            if (response.status !== 200) {
-              return reject('Something was wrong with refresh token process. Code 01');
-            }
-            if (!response.data || response.data === '') {
-              return reject('Something was wrong with refresh token process. Code 02');
-            }
-            const json = JSON.parse(response.data);
-            this.accessToken = json.access_token;
-            authData.access_token = json.access_token;
-            authData.expires_in = json.expires_in || 600;
+          .then((response: any) => {
+            this.accessToken = response.access_token;
+            authData.access_token = response.access_token;
+            authData.expires_in = response.expires_in || 600;
             authData.refresh_at = Date.now() + authData.expires_in * 1000;
             this.refreshTokenTimeout = setTimeout(this.refreshToken.bind(this), authData.expires_in * 1000) ;
             this.localStorage.setAuthData(authData);
             return resolve();
           })
           .catch((reason: any) => {
+            console.log(reason);
             return reject('Something was wrong with refresh token process. Code 03');
         });
       } catch (error) {
+        console.log(error);
         return reject('Something was wrong with refresh token process. Code 00');
       }
     });

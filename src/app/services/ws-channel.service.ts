@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HTTP, HTTPResponse } from '@ionic-native/http/ngx';
-import { Socket } from 'ngx-socket-io';
-import { CLIENT_ID, SERVER_URL } from 'src/environments/environment';
+import { Socket, SocketIoConfig, ɵa as SocketFactory } from 'ngx-socket-io';
+import { ATS_WS_CHANNEL_PATH, CLIENT_ID, SERVER_URL, WS_SERVER_URL } from 'src/environments/environment';
 import { AtsErrors, Channel, ProtocolMesssages, SensorLocation, SystemState } from '../app.values';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class WebSocketChannel implements Channel {
   private receiveEventsHandler: (config: any) => void = null;
   private receiveSensorsHandler: (sensors: any) => void = null;
 
-  constructor(private socket: Socket, private http: HTTP) {
+  constructor(private socket: Socket, private authService: AuthService, private http: HTTP) {
     this.init();
   }
 
@@ -51,6 +52,7 @@ export class WebSocketChannel implements Channel {
   }
 
   private onSocketConnected(): void {
+    console.log('ws connected');
     this.online = true;
     this.reconnectIntents = 0;
     clearInterval(this.reconnectIntervalId);
@@ -61,6 +63,7 @@ export class WebSocketChannel implements Channel {
   }
 
   private onSocketDisconnected(): void {
+    console.log('ws disconnected');
     this.online = false;
     this.reconnectIntervalId = setInterval(this.reconnect.bind(this), 5000);
     if (this.disconnectedHandler) {
@@ -69,27 +72,74 @@ export class WebSocketChannel implements Channel {
   }
 
   private onReceiveTimeHandler(time: number): void {
+    console.log('ws on receive time');
     if (this.receiveTimeHandler) {
       this.receiveTimeHandler(time);
     }
   }
 
   private onReceiveWhoHandler(): void {
+    console.log('ws on receive who');
     if (this.receiveWhoHandler) {
       this.receiveWhoHandler();
     }
   }
 
   private onReceiveEventsHandler(config: any): void {
+    console.log('ws on receive events');
     if (this.receiveEventsHandler) {
       this.receiveEventsHandler(config);
     }
   }
 
   private onReceiveSensorsHandler(sensors: any): void {
+    console.log('ws on receive sensors');
     if (this.receiveSensorsHandler) {
       this.receiveSensorsHandler(sensors);
     }
+  }
+
+  private async initializeSocket(): Promise<void> {
+    console.log('initialize web socket client');
+    if (this.socket) {
+      this.socket.removeAllListeners();
+      this.socket.disconnect();
+      this.socket = null;
+    }
+    const token = await this.authService.getAccessToken();
+    if (!token) {
+      console.log('Not authenticated');
+      return;
+    }
+    const config: SocketIoConfig = {
+      url: WS_SERVER_URL,
+      // options: { extraHeaders: { Authorization: token } }
+      options: {
+        path: ATS_WS_CHANNEL_PATH,
+        transports: ['polling', 'websocket'],
+        transportOptions: {
+          polling: {
+            extraHeaders: { Authorization: `Bearer ${token}` }
+          }
+        }
+      }
+    };
+    this.socket = SocketFactory(config);
+    this.socket.connect();
+    this.socket.on('connect_error', (error: any) => {
+      console.log('onConnectError', JSON.stringify(error));
+      if (error && error.type === 'TransportError') {
+        if (error.description === 401) {
+          this.authService.refreshToken();
+        }
+        if (this.socket) {
+          this.socket.removeAllListeners();
+          this.socket.disconnect();
+          this.socket = null;
+        }
+        setTimeout(this.initializeSocket.bind(this), 5000);
+      }
+    });
   }
 
   connect(): void {
@@ -98,8 +148,8 @@ export class WebSocketChannel implements Channel {
       console.log('WebSocket channel is already connected');
       return;
     }
-    console.log(`AtsService connecting to server ${SERVER_URL}`);
-    this.socket.connect();
+    console.log(`AtsService connecting to server ${WS_SERVER_URL}`);
+    this.initializeSocket();
   }
 
   connected(): boolean {
@@ -129,6 +179,7 @@ export class WebSocketChannel implements Channel {
     const clientId = CLIENT_ID;
     const code = parseInt(token, 10);
     const payload = { code, clientId };
+    console.log('sendIsMessage', { code, clientId });
     this.socket.emit(ProtocolMesssages.is, payload);
   }
 

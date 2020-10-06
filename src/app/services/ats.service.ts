@@ -36,7 +36,9 @@ export class AtsService {
 
     this.startMQTTChannel();
 
-    this.mqttChannel.connect();
+    // this.mqttChannel.connect();
+
+    this.webSocketChannel.connect();
 
     this.startServerTimeSync();
 
@@ -142,6 +144,7 @@ export class AtsService {
   }
 
   private onReceiveTime(time: number): void {
+    console.log('receive time', time);
     const serverTime = new Date(time * 1000);
     const localTime = new Date();
     this.timeDiff = localTime.getTime() - serverTime.getTime();
@@ -149,6 +152,7 @@ export class AtsService {
   }
 
   private onReceiveWho(): void {
+    console.log('receive who');
     let needSync = false;
     let wait = 10;
     if (this.lastTimeSynchronization) {
@@ -195,6 +199,7 @@ export class AtsService {
   }
 
   private onReceiveEventsFromWebSockets(channel: Channel, config: any): void {
+    console.log('receive events from ws');
     // tslint:disable-next-line: forin
     for (const event in config) {
       let cb: (data: any) => void;
@@ -215,12 +220,13 @@ export class AtsService {
   }
 
   private onReceiveSensors(sensors: any): void {
-      if (sensors && Array.isArray(sensors)) {
-          this.sensorList = sensors;
-      } else {
-          this.sensorList = [];
-      }
-      this.notify(AtsEvents.SENSORS_UPDATED, this.sensorList);
+    console.log('receive sensors', sensors);
+    if (sensors && Array.isArray(sensors)) {
+        this.sensorList = sensors;
+    } else {
+        this.sensorList = [];
+    }
+    this.notify(AtsEvents.SENSORS_UPDATED, this.sensorList);
   }
 
   private onLWT(online: boolean): void {

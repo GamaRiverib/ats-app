@@ -24,6 +24,8 @@ export const REDIRECT_URI = '';
 export const OAUTH_URL = '';
 
 export const SERVER_URL = '';
+export const WS_SERVER_URL = '';
+export const ATS_WS_CHANNEL_PATH = '';
 export const BROKER = {
   host: '',
   port: 1883,
