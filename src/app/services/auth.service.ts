@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HTTP, HTTPResponse } from '@ionic-native/http/ngx';
 import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_URL, REDIRECT_URI } from 'src/environments/environment';
 import { HttpService } from './http.service';
@@ -223,6 +222,7 @@ export class AuthService {
           })
           .catch((reason: any) => {
             console.log(reason);
+            this.logout();
             return reject('Something was wrong with refresh token process. Code 03');
         });
       } catch (error) {
@@ -244,6 +244,7 @@ export class AuthService {
       const codeVerifier = params.code_challenge;
       return this.subscribeToWebIntent(state, codeVerifier);
     } catch (error) {
+      this.logout();
       throw Error('Error opening the url');
     }
   }

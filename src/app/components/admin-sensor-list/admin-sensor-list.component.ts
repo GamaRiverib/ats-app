@@ -29,11 +29,11 @@ export class AdminSensorListComponent implements OnInit, OnDestroy {
       this.listeners.push(this.ats.subscribe(AtsEvents.SYSTEM_STATE_CHANGED, this.onSystemStateChanged.bind(this)));
       this.listeners.push(this.ats.subscribe(AtsEvents.SENSOR_ACTIVED, this.onSensorActived.bind(this)));
       this.listeners.push(this.ats.subscribe(AtsEvents.SENSORS_UPDATED, this.updateSensors.bind(this)));
-      this.listeners.push(this.ats.subscribe(AtsEvents.SERVER_LWT_ONLINE, this.configureSensors.bind(this)));
+      // this.listeners.push(this.ats.subscribe(AtsEvents.SERVER_LWT_ONLINE, this.configureSensors.bind(this)));
   }
 
   ngOnInit() {
-    this.updateSensors(this.ats.sensors || []);
+    // this.updateSensors(this.ats.sensors || []);
   }
 
   ngOnDestroy() {
@@ -104,10 +104,10 @@ export class AdminSensorListComponent implements OnInit, OnDestroy {
     });
   }
 
-  private configureSensors(): void {
-    if (this.ats.connected) {
+  /*private configureSensors(): void {
+    /*if (this.ats.connected) {
       this.ats.getState().then(this.onSystemStateChanged.bind(this));
-    }
+    }*//*
     this.sensors = this.ats.sensors.map((s: Sensor) => {
       const actived = this.actived.findIndex(a => {
         return a.location.mac === s.location.mac &&
@@ -126,7 +126,7 @@ export class AdminSensorListComponent implements OnInit, OnDestroy {
       };
       return data;
     });
-  }
+  }*/
 
   async sensorDetail(sensor: SensorData): Promise<void> {
     const modal = await this.modalController.create({

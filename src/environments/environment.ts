@@ -15,23 +15,18 @@ export const environment = {
  */
 // import 'zone.js/dist/zone-error';  // Included with Angular CLI.
 
-export const CLIENT_ID = '';
-export const CLIENT_SECRET = '';
+export const OAUTH_CLIENT_ID = 'iot.core.s8nw1gk';
+export const OAUTH_CLIENT_SECRET = '78a431awn0c85bv8irtxonvsai6may7n';
+export const REDIRECT_URI = 'https://ats.gamarivera.dev/oauth2/r';
+export const OAUTH_URL = 'https://tasmota-auth.gamarivera.dev/auth';
 
-export const OAUTH_CLIENT_ID = '';
-export const OAUTH_CLIENT_SECRET = '';
-export const REDIRECT_URI = '';
-export const OAUTH_URL = '';
-
-export const SERVER_URL = '';
-export const WS_SERVER_URL = '';
-export const ATS_WS_CHANNEL_PATH = '';
+export const SERVER_URL = 'http://localhost:8080';
 export const BROKER = {
-  host: '',
-  port: 1883,
-  protocol: 'ws',
-  username: '',
-  password: '',
+  host: 'mqtt.gamarivera.dev',
+  port: 8083,
+  protocol: 'wss',
+  username: 'gama',
+  password: 'test',
   topic: '/ats',
   commands: 'commands'
 };

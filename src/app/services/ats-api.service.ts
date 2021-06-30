@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { CLIENT_ID, CLIENT_SECRET, SERVER_URL } from 'src/environments/environment';
-import { Sensor, SensorLocation } from '../app.values';
+import { SERVER_URL } from 'src/environments/environment';
+import { Sensor } from '../app.values';
 import { AuthService } from './auth.service';
 import { HttpService } from './http.service';
-import { getTotp } from './otp-provider.service';
 
 const BASE_PATH = `${SERVER_URL}/config`;
 
@@ -39,15 +38,8 @@ export class AtsApiService {
     this.lastTimeSynchronization = localTime;
   }
 
-  private getToken(): string {
-    const time = Date.now() - this.timeDiff;
-    const epoch = Math.round(time / 1000.0);
-    const code = getTotp(CLIENT_SECRET, { epoch });
-    return code;
-  }
-
   private throwError(reason: { status: number }): void {
-    console.log(reason);
+    console.error(reason);
     switch (reason.status || -1) {
       case 403:
         throw { error: 0 };
@@ -58,9 +50,13 @@ export class AtsApiService {
     }
   }
 
+  private getToken(): string {
+    return this.auth.getAccessTokenSync();
+  }
+
   private getHeaders(): any {
     return {
-      authorization: `Bearer ${this.auth.getAccessTokenSync()} ${CLIENT_ID} ${this.getToken()}`
+      authorization: `Bearer ${this.getToken()}`
     };
   }
 
@@ -115,6 +111,12 @@ export class AtsApiService {
     return;
   }
 
+  async getSensors(): Promise<Sensor[]> {
+    const url = `${BASE_PATH}/sensors`;
+    const headers = this.getHeaders();
+    return await this.http.get(url, headers);
+  }
+
   async updateSensor(sensor: Sensor): Promise<void> {
     const url = `${BASE_PATH}/sensors`;
     const body = sensor;
@@ -123,10 +125,10 @@ export class AtsApiService {
     return;
   }
 
-  async removeSensor(location: SensorLocation): Promise<void> {
+  async removeSensor(id: string, device: string): Promise<void> {
     const url = `${BASE_PATH}/sensors`;
     const headers = this.getHeaders();
-    await this.http.delete(url, headers, { parameters: { location } });
+    await this.http.delete(url, headers, { parameters: { id, device } });
     return;
   }
 

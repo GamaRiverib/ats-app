@@ -31,7 +31,7 @@ export class SensorsPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.color = KEYS_ICONS[1];
-    this.updateSensors(this.ats.sensors || []);
+    // this.updateSensors(this.ats.sensors || []);
     this.actived.forEach((sensor: Sensor) => {
       this.onSensorActived({ sensor, value: 1 });
     });
@@ -56,7 +56,7 @@ export class SensorsPage implements OnInit, OnDestroy {
     this.sensors.push(sensor);
   }
 
-  private configureSensors(): void {
+  /*private configureSensors(): void {
     this.sensors = this.ats.sensors.map((s: Sensor) => {
       const actived = this.actived.findIndex(a => {
         return a.location.mac === s.location.mac &&
@@ -75,7 +75,7 @@ export class SensorsPage implements OnInit, OnDestroy {
       };
       return data;
     });
-  }
+  }*/
 
   private updateSensors(sensors: Sensor[]): void {
     sensors.forEach((s: Sensor) => {
@@ -182,11 +182,12 @@ export class SensorsPage implements OnInit, OnDestroy {
   async bypass(sensor: SensorData): Promise<void> {
     try {
       await this.requestCode();
-      if (sensor.bypass) {
+      // TODO
+      /*if (sensor.bypass) {
         await this.ats.clearBypassOne(sensor.location, this.code);
       } else {
         await this.ats.bypass(sensor.location, this.code);
-      }
+      }*/
     } catch (reason) {
       this.handleError(reason);
     }

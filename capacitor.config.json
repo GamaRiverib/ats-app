@@ -11,7 +11,7 @@
   },
   "cordova": {},
   "server": {
-    "androidScheme": "https",
+    "androidScheme": "http",
     "allowNavigation": []
   },
   "android": {

@@ -33,9 +33,9 @@ export class ProgrammingPage implements OnInit, OnDestroy {
   }
 
   private getSystemState(): void {
-    if (this.ats.connected) {
+    /*if (this.ats.connected) {
       this.ats.getState().then(this.onSystemStateChanged.bind(this));
-    }
+    }*/
   }
 
   private onSystemStateChanged(data: any): void {

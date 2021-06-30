@@ -55,18 +55,15 @@ export class HomePage implements OnInit, OnDestroy {
     this.ats.subscribe(AtsEvents.MAX_UNAUTHORIZED_INTENTS, this.onMaxUnauthorizedIntents.bind(this));
     this.ats.subscribe(AtsEvents.BYPASS_CHANGE, this.onBypassChange.bind(this));
 
-    // this.ats.subscribe(AtsEvents.WEB_SOCKET_CONNECTED, this.onConnected.bind(this));
-    // this.ats.subscribe(AtsEvents.WEB_SOCKET_DISCONNECTED, this.onDisconnected.bind(this));
-
     this.ats.subscribe(AtsEvents.MQTT_CONNECTED, this.onRemotelyConnected.bind(this));
     this.ats.subscribe(AtsEvents.MQTT_DISCONNECTED, this.onRemotelyDisconnected.bind(this));
 
     this.ats.subscribe(AtsEvents.SERVER_LWT_ONLINE, this.onServerConnectionChange.bind(this, true));
     this.ats.subscribe(AtsEvents.SERVER_LWT_OFFLINE, this.onServerConnectionChange.bind(this, false));
 
-    if (this.ats.connected) {
+    /*if (this.ats.connected) {
       this.ats.getState().then(this.onSystemStateChanged.bind(this));
-    }
+    }*/
 
     this.loading = !this.ats.connected;
     this.online = this.ats.connected;
@@ -82,11 +79,12 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private onSensorActived(data: any): void {
-    console.log('onSensorActived', data);
+    console.debug('onSensorActived', data);
   }
 
   private onAlert(data: any): void {
-    if (data && data.system) {
+    console.debug('onAlert', data);
+    /*if (data && data.system) {
       const activedSensors: Array<number> = data.system.activedSensors || [];
       const sensors: Array<string> = [];
       activedSensors.forEach((i: number) => {
@@ -98,7 +96,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.toast.showLongTop(`Received system alert: ${sensors}`);
     } else {
       this.toast.showLongTop('Received system alert');
-    }
+    }*/
     // vibrator.vibrate([1000, 300, 300]);
     // setTopnavColor(appColors.warning);
     // TODO: log to recent activity
@@ -150,9 +148,9 @@ export class HomePage implements OnInit, OnDestroy {
               view.message = 'Waiting confirmation...';
               clearInterval(view.timeoutIntervalId);
               view.timeoutIntervalId = undefined;
-              view.ats.getState()
+              /*view.ats.getState()
                 .then(this.onSystemStateChanged.bind(this))
-                .catch(error => console.log(error));
+                .catch(error => console.log(error));*/
           }
         }, 1000);
       }
@@ -222,8 +220,8 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private onMaxAlerts(data: any): void {
-    console.log(data);
-    let info  = '';
+    console.debug('onMaxAlerts', data);
+    /*let info  = '';
     if (data && data.system) {
       // TODO
       const sensors: Array<number> = data.system.activedSensors;
@@ -231,7 +229,7 @@ export class HomePage implements OnInit, OnDestroy {
       info = `Sensor ${sensor.name} actived`;
       console.log(data.extras);
       console.log(`ALERT ${info}`);
-    }
+    }*/
 
     if (this.platform.is('hybrid')) {
       this.vibration.vibrate([2000, 300, 300]);
@@ -240,11 +238,11 @@ export class HomePage implements OnInit, OnDestroy {
 
   private onMaxUnauthorizedIntents(data: any): void {
     this.toast.showLongTop('Maximum unauthorized intents');
-    console.log('onMaxUnauthorizedIntents', data);
+    console.debug('onMaxUnauthorizedIntents', data);
   }
 
   private onBypassChange(data: any): void {
-    console.log('onBypassChange', data);
+    console.debug('onBypassChange', data);
   }
 
   private getStateIfNotLoaded(): void {
@@ -263,7 +261,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.stateLoadedRetryCount++;
     this.message = `Waiting state... Retry ${this.stateLoadedRetryCount} of ${MAX_RETRIES}`;
     this.stateLoadedTimeout = setTimeout(this.getStateIfNotLoaded.bind(this), 5000);
-    this.ats.getState()
+    // TODO
+    /*this.ats.getState()
       .then((data: any) => {
         clearTimeout(this.stateLoadedTimeout);
         this.stateLoadedTimeout = undefined;
@@ -271,24 +270,24 @@ export class HomePage implements OnInit, OnDestroy {
       })
       .catch((reason: any) => {
         console.log(reason);
-    });
+    });*/
   }
 
-  private onConnected(data: any): void {
+  /*private onConnected(data: any): void {
     // showNotification('Connected');
     this.online = true;
     this.loading = false;
     console.log('onLocallyConnected');
     setTimeout(this.getStateIfNotLoaded.bind(this), 2000);
-  }
+  }*/
 
-  private onDisconnected(data: any): void {
+  /*private onDisconnected(data: any): void {
     // showNotification('Disconnected', 6000);
     if (!this.ats.connected) {
       this.online = false;
       this.loading = true;
     }
-  }
+  }*/
 
   private onRemotelyConnected(data: any): void {
     this.online = true;
@@ -354,7 +353,8 @@ export class HomePage implements OnInit, OnDestroy {
           console.log('Select mode', text);
           try {
             view.actionSheetController.dismiss();
-            await view.ats.arm(mode);
+            // TODO
+            // await view.ats.arm(mode);
             console.log('arming system...');
           } catch (reason) {
             if (reason) {
@@ -427,7 +427,8 @@ export class HomePage implements OnInit, OnDestroy {
           handler: async (params) => {
             if (params.code && params.code.length > 0) {
               try {
-                await view.ats.disarm(params.code);
+                //await view.ats.disarm(params.code);
+                // TODO
                 console.log('disarming system...');
               } catch (reason) {
                 if (reason) {

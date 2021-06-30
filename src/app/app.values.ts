@@ -65,13 +65,9 @@ export enum SensorGroup {
     ACCESS = 3
 }
 
-export interface SensorLocation {
-    mac: string;
-    pin: number;
-}
-
 export interface Sensor {
-    location: SensorLocation;
+    id: string;
+    device: string;
     type: SensorTypes;
     name: string;
     group: SensorGroup;
@@ -104,20 +100,6 @@ export interface Channel {
     connected(): boolean;
     onConnected(handler: () => void): void;
     onDisconnected(handler: () => void): void;
-    getServerTime(): Promise<number>;
-    sendIsMessage(token: string): void;
-    getState(token: string): Promise<SystemState>;
-    arm(token: string, mode: number, code?: string): Promise<void>;
-    disarm(token: string, code: string): Promise<void>;
-    bypass(token: string, location: SensorLocation, code: string): Promise<void>;
-    bypassAll(token: string, locations: SensorLocation[], code: string): Promise<void>;
-    clearBypass(token: string, code: string): Promise<void>;
-    clearBypassOne(token: string, location: SensorLocation, code: string): Promise<void>;
-    programm(token: string, code: string): Promise<void>;
-    onReceiveTime(handler: (time: number) => void): void;
-    onReceiveWho(handler: () => void): void;
-    onReceiveEvents(handler: (config: any) => void): void;
-    onReceiveSensors(handler: (sensors: any) => void): void;
     subscribe(topic: string, callback: (data: any) => void, config?: any): void;
 }
 
@@ -145,7 +127,8 @@ export const SensorGroupFriendlyNames = [
 ];
 
 export interface SensorData {
-    location: SensorLocation;
+    id: string;
+    device: string;
     name: string;
     type: number;
     group: number;
